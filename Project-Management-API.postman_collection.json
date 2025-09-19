@@ -1,0 +1,886 @@
+{
+    "info": {
+        "_postman_id": "project-management-api-collection",
+        "name": "Project Management API",
+        "description": "Coleção completa da API de Gerenciamento de Projetos com todas as requisições possíveis",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "project-management-api"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"John Doe\",\n  \"password\": \"mypassword123\",\n  \"role\": \"developer\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Registra um novo usuário no sistema"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data.token) {",
+                                    "        pm.environment.set('authToken', response.data.token);",
+                                    "        pm.environment.set('userId', response.data.user.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"mypassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Autentica usuário e retorna token JWT"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Endpoints de autenticação - registro e login de usuários"
+        },
+        {
+            "name": "Projects",
+            "item": [
+                {
+                    "name": "Get All Projects",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects"
+                            ]
+                        },
+                        "description": "Lista todos os projetos do usuário autenticado"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Project",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data.project) {",
+                                    "        pm.environment.set('projectId', response.data.project.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"E-commerce Platform\",\n  \"description\": \"Modern e-commerce solution with React and Node.js\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/projects",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects"
+                            ]
+                        },
+                        "description": "Cria um novo projeto"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Project by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}"
+                            ]
+                        },
+                        "description": "Obtém detalhes de um projeto específico"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Project",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Project Name\",\n  \"description\": \"Updated project description\",\n  \"status\": \"active\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}"
+                            ]
+                        },
+                        "description": "Atualiza informações de um projeto existente"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Project",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}"
+                            ]
+                        },
+                        "description": "Deleta um projeto e todos os seus work items"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Endpoints para gerenciamento de projetos"
+        },
+        {
+            "name": "Work Items",
+            "item": [
+                {
+                    "name": "Get Work Items",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}/items",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}",
+                                "items"
+                            ]
+                        },
+                        "description": "Lista todos os work items de um projeto"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Work Items - Filter by Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}/items?status=in_progress",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}",
+                                "items"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "in_progress",
+                                    "description": "Valores possíveis: todo, in_progress, done"
+                                }
+                            ]
+                        },
+                        "description": "Lista work items filtrados por status"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Work Items - Filter by Type",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}/items?type=bug",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}",
+                                "items"
+                            ],
+                            "query": [
+                                {
+                                    "key": "type",
+                                    "value": "bug",
+                                    "description": "Valores possíveis: task, bug, story"
+                                }
+                            ]
+                        },
+                        "description": "Lista work items filtrados por tipo"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Work Items - Filter by Assignee",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}/items?assigneeId={{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}",
+                                "items"
+                            ],
+                            "query": [
+                                {
+                                    "key": "assigneeId",
+                                    "value": "{{userId}}"
+                                }
+                            ]
+                        },
+                        "description": "Lista work items filtrados por responsável"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Task",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data.item) {",
+                                    "        pm.environment.set('workItemId', response.data.item.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Implement user authentication\",\n  \"description\": \"Add JWT-based authentication system with login and registration\",\n  \"type\": \"task\",\n  \"storyPoints\": 8,\n  \"estimatedHours\": 16\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}/items",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}",
+                                "items"
+                            ]
+                        },
+                        "description": "Cria uma nova tarefa"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Bug",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Login form validation error\",\n  \"description\": \"Email validation fails for valid email addresses with plus signs\",\n  \"type\": \"bug\",\n  \"priority\": \"high\",\n  \"storyPoints\": 3\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}/items",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}",
+                                "items"
+                            ]
+                        },
+                        "description": "Cria um novo bug report"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Story",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"User profile management\",\n  \"description\": \"As a user, I want to manage my profile information so that I can keep my details up to date\",\n  \"type\": \"story\",\n  \"storyPoints\": 5,\n  \"assigneeId\": \"{{userId}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}/items",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}",
+                                "items"
+                            ]
+                        },
+                        "description": "Cria uma nova user story"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Work Item by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{workItemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{workItemId}}"
+                            ]
+                        },
+                        "description": "Obtém detalhes de um work item específico"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Work Item",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Updated task title\",\n  \"description\": \"Updated description with more details\",\n  \"status\": \"in_progress\",\n  \"priority\": \"high\",\n  \"assigneeId\": \"{{userId}}\",\n  \"storyPoints\": 5,\n  \"estimatedHours\": 10\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{workItemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{workItemId}}"
+                            ]
+                        },
+                        "description": "Atualiza informações completas de um work item"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Work Item Status - To Do",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"todo\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{workItemId}}/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{workItemId}}",
+                                "status"
+                            ]
+                        },
+                        "description": "Move work item para To Do"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Work Item Status - In Progress",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"in_progress\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{workItemId}}/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{workItemId}}",
+                                "status"
+                            ]
+                        },
+                        "description": "Move work item para In Progress"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Work Item Status - Done",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"done\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{workItemId}}/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{workItemId}}",
+                                "status"
+                            ]
+                        },
+                        "description": "Move work item para Done"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Work Item Priority",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"priorityOrder\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{workItemId}}/priority",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{workItemId}}",
+                                "priority"
+                            ]
+                        },
+                        "description": "Atualiza a ordem de prioridade do work item no backlog"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Work Item",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/items/{{workItemId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "items",
+                                "{{workItemId}}"
+                            ]
+                        },
+                        "description": "Deleta um work item"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Endpoints para gerenciamento de work items (tarefas, bugs, stories)"
+        },
+        {
+            "name": "Boards",
+            "item": [
+                {
+                    "name": "Get Kanban Board",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}/kanban",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}",
+                                "kanban"
+                            ]
+                        },
+                        "description": "Obtém a visualização do quadro Kanban com items agrupados por status"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Project Backlog",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/{{projectId}}/backlog",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{projectId}}",
+                                "backlog"
+                            ]
+                        },
+                        "description": "Obtém o backlog do projeto com items ordenados por prioridade"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Endpoints para visualizações de quadros (Kanban e Backlog)"
+        },
+        {
+            "name": "Error Examples",
+            "item": [
+                {
+                    "name": "Validation Error - Invalid Registration",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"invalid-email\",\n  \"name\": \"\",\n  \"password\": \"123\",\n  \"role\": \"invalid-role\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Exemplo de erro de validação - dados inválidos no registro"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Authentication Error - No Token",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects"
+                            ]
+                        },
+                        "description": "Exemplo de erro de autenticação - requisição sem token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Authentication Error - Invalid Credentials",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Exemplo de erro de autenticação - credenciais inválidas"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Not Found Error - Invalid Project ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/projects/invalid-project-id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "invalid-project-id"
+                            ]
+                        },
+                        "description": "Exemplo de erro 404 - projeto não encontrado"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Exemplos de requisições que geram erros para teste de tratamento de erros"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3001",
+            "type": "string"
+        }
+    ]
+}

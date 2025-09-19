@@ -1,0 +1,5 @@
+03476f8d-3d12-4583-af28-5ebb1cfd1051|admin@example.com|Admin User|$2b$12$f.gxaaNgSu5pGZ3XT36Su.R64qIcusgNRqxWCLPkWBCHae94XIQj2|admin|2025-09-18 11:53:45|2025-09-18 11:53:45
+a54da739-db9a-4875-84cd-06dc466c540f|manager@example.com|Project Manager|$2b$12$qi5RT/Nn35rp5hTenmh5Q./OpJhoNPwZLVi3alvAq.1lg7Dshq6u2|manager|2025-09-18 11:53:45|2025-09-18 11:53:45
+172949b7-ca67-424a-b708-5bed0a2ce77f|dev1@example.com|Developer One|$2b$12$ZaR1npQxn/HqmpudgbXBjuvVi3pnoVl6Zi2FRyOsMScABis6Y7yHq|developer|2025-09-18 11:53:45|2025-09-18 11:53:45
+226e20c1-997c-45fe-a9ca-85471f15c5cc|dev2@example.com|Developer Two|$2b$12$gTtP75Txr8z4XPPYKkxi6.BlMcgmpaO7Ck66Oy5jdEA4p030mTeyi|developer|2025-09-18 11:53:45|2025-09-18 11:53:45
+5cfbb115-e0ef-4316-a810-8315cb1e0ff6|user@example.com|Math|$2b$12$.q0NQsiwjn6H/YdDiQR0HeVCuIecUPAiNbIJUGBmPJvQqTVfwxUuq|admin|2025-09-18T12:11:40.119Z|2025-09-18T12:11:40.119Z
