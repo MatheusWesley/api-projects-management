@@ -1,11 +1,11 @@
 // Test setup and utilities
-import { beforeAll, afterAll } from 'bun:test';
+import { beforeAll, afterAll } from 'bun:test'
 
 // Global test setup
 beforeAll(() => {
-  // Setup test database, mocks, etc.
-});
+	// Setup test database, mocks, etc.
+})
 
 afterAll(() => {
-  // Cleanup after tests
-});
+	// Cleanup after tests
+})

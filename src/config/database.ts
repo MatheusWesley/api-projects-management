@@ -1,41 +1,41 @@
-import { Database } from 'bun:sqlite';
-import type { DatabaseConfig } from '../types/common.js';
+import { Database } from 'bun:sqlite'
+import type { DatabaseConfig } from '../types/common.js'
 
-let db: Database | null = null;
+let db: Database | null = null
 
 export function initializeDatabase(config: DatabaseConfig): Database {
-  if (db) {
-    return db;
-  }
+	if (db) {
+		return db
+	}
 
-  db = new Database(config.filename);
-  
-  // Enable foreign keys
-  db.exec('PRAGMA foreign_keys = ON');
-  
-  // Create tables
-  createTables(db);
-  
-  return db;
+	db = new Database(config.filename)
+
+	// Enable foreign keys
+	db.exec('PRAGMA foreign_keys = ON')
+
+	// Create tables
+	createTables(db)
+
+	return db
 }
 
 export function getDatabase(): Database {
-  if (!db) {
-    throw new Error('Database not initialized. Call initializeDatabase first.');
-  }
-  return db;
+	if (!db) {
+		throw new Error('Database not initialized. Call initializeDatabase first.')
+	}
+	return db
 }
 
 export function closeDatabase(): void {
-  if (db) {
-    db.close();
-    db = null;
-  }
+	if (db) {
+		db.close()
+		db = null
+	}
 }
 
 function createTables(database: Database): void {
-  // Users table
-  database.exec(`
+	// Users table
+	database.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
@@ -45,10 +45,10 @@ function createTables(database: Database): void {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
-  `);
+  `)
 
-  // Projects table
-  database.exec(`
+	// Projects table
+	database.exec(`
     CREATE TABLE IF NOT EXISTS projects (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -59,10 +59,10 @@ function createTables(database: Database): void {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
     );
-  `);
+  `)
 
-  // Work items table
-  database.exec(`
+	// Work items table
+	database.exec(`
     CREATE TABLE IF NOT EXISTS work_items (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
@@ -82,10 +82,10 @@ function createTables(database: Database): void {
       FOREIGN KEY (assignee_id) REFERENCES users(id) ON DELETE SET NULL,
       FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE
     );
-  `);
+  `)
 
-  // Sprints table (for future use)
-  database.exec(`
+	// Sprints table (for future use)
+	database.exec(`
     CREATE TABLE IF NOT EXISTS sprints (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -98,10 +98,10 @@ function createTables(database: Database): void {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
     );
-  `);
+  `)
 
-  // Create indexes for better performance
-  database.exec(`
+	// Create indexes for better performance
+	database.exec(`
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
     CREATE INDEX IF NOT EXISTS idx_projects_owner_id ON projects(owner_id);
@@ -120,60 +120,62 @@ function createTables(database: Database): void {
     CREATE INDEX IF NOT EXISTS idx_sprints_project_id ON sprints(project_id);
     CREATE INDEX IF NOT EXISTS idx_sprints_status ON sprints(status);
     CREATE INDEX IF NOT EXISTS idx_sprints_dates ON sprints(start_date, end_date);
-  `);
+  `)
 }
 
 // Utility function to generate UUID
 export function generateId(): string {
-  return crypto.randomUUID();
+	return crypto.randomUUID()
 }
 
 // Utility function to parse dates from database
 function parseDate(value: string | Date | null | undefined): Date {
-  if (!value) return new Date();
-  return typeof value === 'string' ? new Date(value) : value;
+	if (!value) return new Date()
+	return typeof value === 'string' ? new Date(value) : value
 }
 
 // Database row to entity mappers
 export function mapUserRow(row: any): import('../types/user.js').User {
-  return {
-    id: row.id,
-    email: row.email,
-    name: row.name,
-    password: row.password,
-    role: row.role,
-    createdAt: parseDate(row.created_at),
-    updatedAt: parseDate(row.updated_at)
-  };
+	return {
+		id: row.id,
+		email: row.email,
+		name: row.name,
+		password: row.password,
+		role: row.role,
+		createdAt: parseDate(row.created_at),
+		updatedAt: parseDate(row.updated_at),
+	}
 }
 
 export function mapProjectRow(row: any): import('../types/project.js').Project {
-  return {
-    id: row.id,
-    name: row.name,
-    description: row.description || '',
-    ownerId: row.owner_id,
-    status: row.status,
-    createdAt: parseDate(row.created_at),
-    updatedAt: parseDate(row.updated_at)
-  };
+	return {
+		id: row.id,
+		name: row.name,
+		description: row.description || '',
+		ownerId: row.owner_id,
+		status: row.status,
+		createdAt: parseDate(row.created_at),
+		updatedAt: parseDate(row.updated_at),
+	}
 }
 
-export function mapWorkItemRow(row: any): import('../types/workItem.js').WorkItem {
-  return {
-    id: row.id,
-    title: row.title,
-    description: row.description || '',
-    type: row.type,
-    status: row.status,
-    priority: row.priority,
-    projectId: row.project_id,
-    assigneeId: row.assignee_id || undefined,
-    reporterId: row.reporter_id,
-    storyPoints: row.story_points || undefined,
-    estimatedHours: row.estimated_hours || undefined,
-    priorityOrder: row.priority_order,
-    createdAt: parseDate(row.created_at),
-    updatedAt: parseDate(row.updated_at)
-  };
+export function mapWorkItemRow(
+	row: any,
+): import('../types/workItem.js').WorkItem {
+	return {
+		id: row.id,
+		title: row.title,
+		description: row.description || '',
+		type: row.type,
+		status: row.status,
+		priority: row.priority,
+		projectId: row.project_id,
+		assigneeId: row.assignee_id || undefined,
+		reporterId: row.reporter_id,
+		storyPoints: row.story_points || undefined,
+		estimatedHours: row.estimated_hours || undefined,
+		priorityOrder: row.priority_order,
+		createdAt: parseDate(row.created_at),
+		updatedAt: parseDate(row.updated_at),
+	}
 }

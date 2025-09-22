@@ -1,320 +1,426 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
-import { WorkItemRepository } from '../../src/repositories/WorkItemRepository.js';
-import { 
-  createTestDatabase, 
-  cleanupTestDatabase, 
-  testWorkItemData, 
-  createTestUser, 
-  createTestProject 
-} from './setup.js';
-import type { MockDatabase } from './mock-database.js';
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { WorkItemRepository } from '../../src/repositories/WorkItemRepository.js'
+import {
+	createTestDatabase,
+	cleanupTestDatabase,
+	testWorkItemData,
+	createTestUser,
+	createTestProject,
+} from './setup.js'
+import type { MockDatabase } from './mock-database.js'
 
 describe('WorkItemRepository', () => {
-  let db: MockDatabase;
-  let workItemRepository: WorkItemRepository;
-  let testUserId: string;
-  let testProjectId: string;
+	let db: MockDatabase
+	let workItemRepository: WorkItemRepository
+	let testUserId: string
+	let testProjectId: string
 
-  beforeEach(() => {
-    db = createTestDatabase();
-    workItemRepository = new WorkItemRepository(db);
-    testUserId = createTestUser(db);
-    testProjectId = createTestProject(db, testUserId);
-  });
+	beforeEach(() => {
+		db = createTestDatabase()
+		workItemRepository = new WorkItemRepository(db)
+		testUserId = createTestUser(db)
+		testProjectId = createTestProject(db, testUserId)
+	})
 
-  afterEach(() => {
-    cleanupTestDatabase();
-  });
+	afterEach(() => {
+		cleanupTestDatabase()
+	})
 
-  describe('create', () => {
-    it('should create a work item successfully', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      const workItem = await workItemRepository.create(itemData);
+	describe('create', () => {
+		it('should create a work item successfully', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
+			const workItem = await workItemRepository.create(itemData)
 
-      expect(workItem.id).toBeDefined();
-      expect(workItem.title).toBe(testWorkItemData.title);
-      expect(workItem.description).toBe(testWorkItemData.description);
-      expect(workItem.type).toBe(testWorkItemData.type);
-      expect(workItem.status).toBe('todo');
-      expect(workItem.priority).toBe('medium');
-      expect(workItem.projectId).toBe(testProjectId);
-      expect(workItem.reporterId).toBe(testUserId);
-      expect(workItem.priorityOrder).toBe(1);
-      expect(workItem.createdAt).toBeInstanceOf(Date);
-      expect(workItem.updatedAt).toBeInstanceOf(Date);
-    });
+			expect(workItem.id).toBeDefined()
+			expect(workItem.title).toBe(testWorkItemData.title)
+			expect(workItem.description).toBe(testWorkItemData.description)
+			expect(workItem.type).toBe(testWorkItemData.type)
+			expect(workItem.status).toBe('todo')
+			expect(workItem.priority).toBe('medium')
+			expect(workItem.projectId).toBe(testProjectId)
+			expect(workItem.reporterId).toBe(testUserId)
+			expect(workItem.priorityOrder).toBe(1)
+			expect(workItem.createdAt).toBeInstanceOf(Date)
+			expect(workItem.updatedAt).toBeInstanceOf(Date)
+		})
 
-    it('should assign incremental priority order', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      
-      const item1 = await workItemRepository.create(itemData);
-      const item2 = await workItemRepository.create({ ...itemData, title: 'Item 2' });
+		it('should assign incremental priority order', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
 
-      expect(item1.priorityOrder).toBe(1);
-      expect(item2.priorityOrder).toBe(2);
-    });
+			const item1 = await workItemRepository.create(itemData)
+			const item2 = await workItemRepository.create({
+				...itemData,
+				title: 'Item 2',
+			})
 
-    it('should create work item with optional fields', async () => {
-      const assigneeId = createTestUser(db, { email: 'assignee@example.com' });
-      const itemData = { 
-        ...testWorkItemData, 
-        projectId: testProjectId, 
-        reporterId: testUserId,
-        assigneeId,
-        storyPoints: 5,
-        estimatedHours: 8
-      };
-      
-      const workItem = await workItemRepository.create(itemData);
+			expect(item1.priorityOrder).toBe(1)
+			expect(item2.priorityOrder).toBe(2)
+		})
 
-      expect(workItem.assigneeId).toBe(assigneeId);
-      expect(workItem.storyPoints).toBe(5);
-      expect(workItem.estimatedHours).toBe(8);
-    });
+		it('should create work item with optional fields', async () => {
+			const assigneeId = createTestUser(db, { email: 'assignee@example.com' })
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+				assigneeId,
+				storyPoints: 5,
+				estimatedHours: 8,
+			}
 
-    it('should throw error when creating work item with invalid project ID', async () => {
-      const itemData = { ...testWorkItemData, projectId: 'invalid-project-id', reporterId: testUserId };
+			const workItem = await workItemRepository.create(itemData)
 
-      await expect(workItemRepository.create(itemData)).rejects.toThrow(
-        'Invalid project ID, assignee ID, or reporter ID'
-      );
-    });
-  });
+			expect(workItem.assigneeId).toBe(assigneeId)
+			expect(workItem.storyPoints).toBe(5)
+			expect(workItem.estimatedHours).toBe(8)
+		})
 
-  describe('findById', () => {
-    it('should find work item by id', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      const createdItem = await workItemRepository.create(itemData);
-      const foundItem = await workItemRepository.findById(createdItem.id);
+		it('should throw error when creating work item with invalid project ID', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: 'invalid-project-id',
+				reporterId: testUserId,
+			}
 
-      expect(foundItem).not.toBeNull();
-      expect(foundItem!.id).toBe(createdItem.id);
-      expect(foundItem!.title).toBe(testWorkItemData.title);
-    });
+			await expect(workItemRepository.create(itemData)).rejects.toThrow(
+				'Invalid project ID, assignee ID, or reporter ID',
+			)
+		})
+	})
 
-    it('should return null for non-existent work item', async () => {
-      const foundItem = await workItemRepository.findById('non-existent-id');
-      expect(foundItem).toBeNull();
-    });
-  });
+	describe('findById', () => {
+		it('should find work item by id', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
+			const createdItem = await workItemRepository.create(itemData)
+			const foundItem = await workItemRepository.findById(createdItem.id)
 
-  describe('findByProjectId', () => {
-    it('should find work items by project id', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      
-      const item1 = await workItemRepository.create(itemData);
-      const item2 = await workItemRepository.create({ ...itemData, title: 'Item 2' });
+			expect(foundItem).not.toBeNull()
+			expect(foundItem!.id).toBe(createdItem.id)
+			expect(foundItem!.title).toBe(testWorkItemData.title)
+		})
 
-      const items = await workItemRepository.findByProjectId(testProjectId);
+		it('should return null for non-existent work item', async () => {
+			const foundItem = await workItemRepository.findById('non-existent-id')
+			expect(foundItem).toBeNull()
+		})
+	})
 
-      expect(items).toHaveLength(2);
-      expect(items[0].priorityOrder).toBeLessThanOrEqual(items[1].priorityOrder);
-    });
+	describe('findByProjectId', () => {
+		it('should find work items by project id', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
 
-    it('should return empty array for project with no work items', async () => {
-      const items = await workItemRepository.findByProjectId(testProjectId);
-      expect(items).toEqual([]);
-    });
-  });
+			const item1 = await workItemRepository.create(itemData)
+			const item2 = await workItemRepository.create({
+				...itemData,
+				title: 'Item 2',
+			})
 
-  describe('findByAssigneeId', () => {
-    it('should find work items by assignee id', async () => {
-      const assigneeId = createTestUser(db, { email: 'assignee@example.com' });
-      const itemData = { 
-        ...testWorkItemData, 
-        projectId: testProjectId, 
-        reporterId: testUserId,
-        assigneeId 
-      };
-      
-      const item1 = await workItemRepository.create(itemData);
-      const item2 = await workItemRepository.create({ ...itemData, title: 'Item 2' });
+			const items = await workItemRepository.findByProjectId(testProjectId)
 
-      const items = await workItemRepository.findByAssigneeId(assigneeId);
+			expect(items).toHaveLength(2)
+			expect(items[0].priorityOrder).toBeLessThanOrEqual(items[1].priorityOrder)
+		})
 
-      expect(items).toHaveLength(2);
-      expect(items.every(item => item.assigneeId === assigneeId)).toBe(true);
-    });
-  });
+		it('should return empty array for project with no work items', async () => {
+			const items = await workItemRepository.findByProjectId(testProjectId)
+			expect(items).toEqual([])
+		})
+	})
 
-  describe('update', () => {
-    it('should update work item successfully', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      const createdItem = await workItemRepository.create(itemData);
-      const updateData = { 
-        title: 'Updated Title', 
-        status: 'in_progress' as const,
-        priority: 'high' as const
-      };
+	describe('findByAssigneeId', () => {
+		it('should find work items by assignee id', async () => {
+			const assigneeId = createTestUser(db, { email: 'assignee@example.com' })
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+				assigneeId,
+			}
 
-      const updatedItem = await workItemRepository.update(createdItem.id, updateData);
+			const item1 = await workItemRepository.create(itemData)
+			const item2 = await workItemRepository.create({
+				...itemData,
+				title: 'Item 2',
+			})
 
-      expect(updatedItem.title).toBe(updateData.title);
-      expect(updatedItem.status).toBe(updateData.status);
-      expect(updatedItem.priority).toBe(updateData.priority);
-      expect(updatedItem.description).toBe(testWorkItemData.description); // unchanged
-      expect(updatedItem.updatedAt.getTime()).toBeGreaterThan(updatedItem.createdAt.getTime());
-    });
+			const items = await workItemRepository.findByAssigneeId(assigneeId)
 
-    it('should throw error when updating non-existent work item', async () => {
-      await expect(workItemRepository.update('non-existent-id', { title: 'New Title' })).rejects.toThrow(
-        'Work item not found'
-      );
-    });
+			expect(items).toHaveLength(2)
+			expect(items.every((item) => item.assigneeId === assigneeId)).toBe(true)
+		})
+	})
 
-    it('should return unchanged work item when no update data provided', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      const createdItem = await workItemRepository.create(itemData);
-      const updatedItem = await workItemRepository.update(createdItem.id, {});
+	describe('update', () => {
+		it('should update work item successfully', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
+			const createdItem = await workItemRepository.create(itemData)
+			const updateData = {
+				title: 'Updated Title',
+				status: 'in_progress' as const,
+				priority: 'high' as const,
+			}
 
-      expect(updatedItem).toEqual(createdItem);
-    });
-  });
+			const updatedItem = await workItemRepository.update(
+				createdItem.id,
+				updateData,
+			)
 
-  describe('delete', () => {
-    it('should delete work item successfully', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      const createdItem = await workItemRepository.create(itemData);
+			expect(updatedItem.title).toBe(updateData.title)
+			expect(updatedItem.status).toBe(updateData.status)
+			expect(updatedItem.priority).toBe(updateData.priority)
+			expect(updatedItem.description).toBe(testWorkItemData.description) // unchanged
+			expect(updatedItem.updatedAt.getTime()).toBeGreaterThan(
+				updatedItem.createdAt.getTime(),
+			)
+		})
 
-      await workItemRepository.delete(createdItem.id);
+		it('should throw error when updating non-existent work item', async () => {
+			await expect(
+				workItemRepository.update('non-existent-id', { title: 'New Title' }),
+			).rejects.toThrow('Work item not found')
+		})
 
-      const foundItem = await workItemRepository.findById(createdItem.id);
-      expect(foundItem).toBeNull();
-    });
+		it('should return unchanged work item when no update data provided', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
+			const createdItem = await workItemRepository.create(itemData)
+			const updatedItem = await workItemRepository.update(createdItem.id, {})
 
-    it('should throw error when deleting non-existent work item', async () => {
-      await expect(workItemRepository.delete('non-existent-id')).rejects.toThrow(
-        'Work item not found'
-      );
-    });
-  });
+			expect(updatedItem).toEqual(createdItem)
+		})
+	})
 
-  describe('findByStatus', () => {
-    it('should find work items by status', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      
-      const item1 = await workItemRepository.create(itemData);
-      const item2 = await workItemRepository.create({ ...itemData, title: 'Item 2' });
-      await workItemRepository.update(item2.id, { status: 'in_progress' });
+	describe('delete', () => {
+		it('should delete work item successfully', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
+			const createdItem = await workItemRepository.create(itemData)
 
-      const todoItems = await workItemRepository.findByStatus(testProjectId, 'todo');
-      const inProgressItems = await workItemRepository.findByStatus(testProjectId, 'in_progress');
+			await workItemRepository.delete(createdItem.id)
 
-      expect(todoItems).toHaveLength(1);
-      expect(todoItems[0].id).toBe(item1.id);
-      expect(inProgressItems).toHaveLength(1);
-      expect(inProgressItems[0].id).toBe(item2.id);
-    });
-  });
+			const foundItem = await workItemRepository.findById(createdItem.id)
+			expect(foundItem).toBeNull()
+		})
 
-  describe('updatePriority', () => {
-    it('should update work item priority order', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      const createdItem = await workItemRepository.create(itemData);
+		it('should throw error when deleting non-existent work item', async () => {
+			await expect(
+				workItemRepository.delete('non-existent-id'),
+			).rejects.toThrow('Work item not found')
+		})
+	})
 
-      const updatedItem = await workItemRepository.updatePriority(createdItem.id, 5);
+	describe('findByStatus', () => {
+		it('should find work items by status', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
 
-      expect(updatedItem.priorityOrder).toBe(5);
-      expect(updatedItem.updatedAt.getTime()).toBeGreaterThan(updatedItem.createdAt.getTime());
-    });
+			const item1 = await workItemRepository.create(itemData)
+			const item2 = await workItemRepository.create({
+				...itemData,
+				title: 'Item 2',
+			})
+			await workItemRepository.update(item2.id, { status: 'in_progress' })
 
-    it('should throw error when updating priority of non-existent work item', async () => {
-      await expect(workItemRepository.updatePriority('non-existent-id', 5)).rejects.toThrow(
-        'Work item not found'
-      );
-    });
-  });
+			const todoItems = await workItemRepository.findByStatus(
+				testProjectId,
+				'todo',
+			)
+			const inProgressItems = await workItemRepository.findByStatus(
+				testProjectId,
+				'in_progress',
+			)
 
-  describe('findBacklogItems', () => {
-    it('should find backlog items (todo status)', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      
-      const item1 = await workItemRepository.create(itemData);
-      const item2 = await workItemRepository.create({ ...itemData, title: 'Item 2' });
-      await workItemRepository.update(item2.id, { status: 'in_progress' });
+			expect(todoItems).toHaveLength(1)
+			expect(todoItems[0].id).toBe(item1.id)
+			expect(inProgressItems).toHaveLength(1)
+			expect(inProgressItems[0].id).toBe(item2.id)
+		})
+	})
 
-      const backlogItems = await workItemRepository.findBacklogItems(testProjectId);
+	describe('updatePriority', () => {
+		it('should update work item priority order', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
+			const createdItem = await workItemRepository.create(itemData)
 
-      expect(backlogItems).toHaveLength(1);
-      expect(backlogItems[0].id).toBe(item1.id);
-      expect(backlogItems[0].status).toBe('todo');
-    });
-  });
+			const updatedItem = await workItemRepository.updatePriority(
+				createdItem.id,
+				5,
+			)
 
-  describe('findWithFilters', () => {
-    it('should find work items with multiple filters', async () => {
-      const assigneeId = createTestUser(db, { email: 'assignee@example.com' });
-      const itemData = { 
-        ...testWorkItemData, 
-        projectId: testProjectId, 
-        reporterId: testUserId,
-        assigneeId 
-      };
-      
-      const item1 = await workItemRepository.create(itemData);
-      const item2 = await workItemRepository.create({ 
-        ...itemData, 
-        title: 'Bug Item', 
-        type: 'bug' as const 
-      });
-      await workItemRepository.update(item2.id, { status: 'in_progress', priority: 'high' });
+			expect(updatedItem.priorityOrder).toBe(5)
+			expect(updatedItem.updatedAt.getTime()).toBeGreaterThan(
+				updatedItem.createdAt.getTime(),
+			)
+		})
 
-      const filteredItems = await workItemRepository.findWithFilters(testProjectId, {
-        status: 'in_progress',
-        type: 'bug',
-        priority: 'high'
-      });
+		it('should throw error when updating priority of non-existent work item', async () => {
+			await expect(
+				workItemRepository.updatePriority('non-existent-id', 5),
+			).rejects.toThrow('Work item not found')
+		})
+	})
 
-      expect(filteredItems).toHaveLength(1);
-      expect(filteredItems[0].id).toBe(item2.id);
-    });
-  });
+	describe('findBacklogItems', () => {
+		it('should find backlog items (todo status)', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
 
-  describe('reorderBacklogItems', () => {
-    it('should reorder backlog items', async () => {
-      const itemData = { ...testWorkItemData, projectId: testProjectId, reporterId: testUserId };
-      
-      const item1 = await workItemRepository.create(itemData);
-      const item2 = await workItemRepository.create({ ...itemData, title: 'Item 2' });
-      const item3 = await workItemRepository.create({ ...itemData, title: 'Item 3' });
+			const item1 = await workItemRepository.create(itemData)
+			const item2 = await workItemRepository.create({
+				...itemData,
+				title: 'Item 2',
+			})
+			await workItemRepository.update(item2.id, { status: 'in_progress' })
 
-      // Reorder: item3, item1, item2
-      await workItemRepository.reorderBacklogItems(testProjectId, [item3.id, item1.id, item2.id]);
+			const backlogItems =
+				await workItemRepository.findBacklogItems(testProjectId)
 
-      const reorderedItem1 = await workItemRepository.findById(item1.id);
-      const reorderedItem2 = await workItemRepository.findById(item2.id);
-      const reorderedItem3 = await workItemRepository.findById(item3.id);
+			expect(backlogItems).toHaveLength(1)
+			expect(backlogItems[0].id).toBe(item1.id)
+			expect(backlogItems[0].status).toBe('todo')
+		})
+	})
 
-      expect(reorderedItem3!.priorityOrder).toBe(1);
-      expect(reorderedItem1!.priorityOrder).toBe(2);
-      expect(reorderedItem2!.priorityOrder).toBe(3);
-    });
-  });
+	describe('findWithFilters', () => {
+		it('should find work items with multiple filters', async () => {
+			const assigneeId = createTestUser(db, { email: 'assignee@example.com' })
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+				assigneeId,
+			}
 
-  describe('getItemsWithAssigneeInfo', () => {
-    it('should get work items with assignee information', async () => {
-      const assigneeId = createTestUser(db, { email: 'assignee@example.com', name: 'Assignee User' });
-      const itemData = { 
-        ...testWorkItemData, 
-        projectId: testProjectId, 
-        reporterId: testUserId,
-        assigneeId 
-      };
-      
-      await workItemRepository.create(itemData);
-      await workItemRepository.create({ ...itemData, title: 'Unassigned Item', assigneeId: undefined });
+			const item1 = await workItemRepository.create(itemData)
+			const item2 = await workItemRepository.create({
+				...itemData,
+				title: 'Bug Item',
+				type: 'bug' as const,
+			})
+			await workItemRepository.update(item2.id, {
+				status: 'in_progress',
+				priority: 'high',
+			})
 
-      const itemsWithAssignee = await workItemRepository.getItemsWithAssigneeInfo(testProjectId);
+			const filteredItems = await workItemRepository.findWithFilters(
+				testProjectId,
+				{
+					status: 'in_progress',
+					type: 'bug',
+					priority: 'high',
+				},
+			)
 
-      expect(itemsWithAssignee).toHaveLength(2);
-      
-      const assignedItem = itemsWithAssignee.find(item => item.assigneeId === assigneeId);
-      const unassignedItem = itemsWithAssignee.find(item => !item.assigneeId);
+			expect(filteredItems).toHaveLength(1)
+			expect(filteredItems[0].id).toBe(item2.id)
+		})
+	})
 
-      expect(assignedItem!.assigneeName).toBe('Assignee User');
-      expect(assignedItem!.assigneeEmail).toBe('assignee@example.com');
-      expect(unassignedItem!.assigneeName).toBeUndefined();
-      expect(unassignedItem!.assigneeEmail).toBeUndefined();
-    });
-  });
-});
+	describe('reorderBacklogItems', () => {
+		it('should reorder backlog items', async () => {
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+			}
+
+			const item1 = await workItemRepository.create(itemData)
+			const item2 = await workItemRepository.create({
+				...itemData,
+				title: 'Item 2',
+			})
+			const item3 = await workItemRepository.create({
+				...itemData,
+				title: 'Item 3',
+			})
+
+			// Reorder: item3, item1, item2
+			await workItemRepository.reorderBacklogItems(testProjectId, [
+				item3.id,
+				item1.id,
+				item2.id,
+			])
+
+			const reorderedItem1 = await workItemRepository.findById(item1.id)
+			const reorderedItem2 = await workItemRepository.findById(item2.id)
+			const reorderedItem3 = await workItemRepository.findById(item3.id)
+
+			expect(reorderedItem3!.priorityOrder).toBe(1)
+			expect(reorderedItem1!.priorityOrder).toBe(2)
+			expect(reorderedItem2!.priorityOrder).toBe(3)
+		})
+	})
+
+	describe('getItemsWithAssigneeInfo', () => {
+		it('should get work items with assignee information', async () => {
+			const assigneeId = createTestUser(db, {
+				email: 'assignee@example.com',
+				name: 'Assignee User',
+			})
+			const itemData = {
+				...testWorkItemData,
+				projectId: testProjectId,
+				reporterId: testUserId,
+				assigneeId,
+			}
+
+			await workItemRepository.create(itemData)
+			await workItemRepository.create({
+				...itemData,
+				title: 'Unassigned Item',
+				assigneeId: undefined,
+			})
+
+			const itemsWithAssignee =
+				await workItemRepository.getItemsWithAssigneeInfo(testProjectId)
+
+			expect(itemsWithAssignee).toHaveLength(2)
+
+			const assignedItem = itemsWithAssignee.find(
+				(item) => item.assigneeId === assigneeId,
+			)
+			const unassignedItem = itemsWithAssignee.find((item) => !item.assigneeId)
+
+			expect(assignedItem!.assigneeName).toBe('Assignee User')
+			expect(assignedItem!.assigneeEmail).toBe('assignee@example.com')
+			expect(unassignedItem!.assigneeName).toBeUndefined()
+			expect(unassignedItem!.assigneeEmail).toBeUndefined()
+		})
+	})
+})
